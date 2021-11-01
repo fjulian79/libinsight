@@ -1,0 +1,18 @@
+{
+    "name": "libinsight",
+    "version": "1.0.0",
+    "keywords": "debugging, data streaming",
+    "description": "A libary to stream data in binary form to a host computer.",
+    "license": "GPL-3.0",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/fjulian79/libinsight.git"
+    },
+    "frameworks": "arduino",
+    "platforms": 
+    [
+      "ststm32",
+      "espressif8266"
+    ]
+  }
