@@ -70,6 +70,13 @@ class Insight
         void setPeriod(uint32_t millis);
 
         /**
+         * @brief Tells the currently configured insight task period
+         * 
+         * @return Task period in ms.
+         */
+        uint32_t getPeriod(void);
+
+        /**
          * @brief Used to enable or disable the data transmission.
          * 
          * @param state True to allow data transmission, in this case the header 
@@ -81,9 +88,10 @@ class Insight
          *          
          *              False to prevent data tansmission.
          * 
-         * @param sync  If set to true the task function will be scheduled when
-         *              called next time to start data transmission asap related
-         *              to this call. Default is false.
+         * @param sync  If set to true the task function will schedule data 
+         *              transmission when called next time and will not wait 
+         *              until it's next tick. From this time on it will 
+         *              transmitt data in the given interval.
          * 
          * @return true in case of success. 
          * @return false if the transmission can not be started.
@@ -93,14 +101,43 @@ class Insight
         /**
          * @brief Tells if data transmission is taking place or not.
          * 
-         * Basically if there has been a call of enable(true). This starts the
-         * transmission if the provided task function is used. If you don't use
-         * the task you have to call transmit() on your own somehow.
+         * Basically it just tells you if there has been a call of enable(true).
+         * This starts the transmission if the provided task function is used. 
+         * If you don't use the task you have to call transmit() on your own 
+         * somehow and there will be no tranmission by the lib.
          * 
          * @return true data transmitted is enabled
          * @return false if no data is not enabled.
          */
         bool isEnabled(void);
+
+        /**
+         * @brief Allows to pause a active data transmission.
+         * 
+         * Pause can be enabled at any time. If enabled the task function will 
+         * NOT transmit any data no mather if the stream is enabled or not. 
+         * 
+         * Calling enable(...) has no effect on the pause state.
+         * 
+         * HENCE: Calling pause(false) will not trigger transmission of the 
+         *        header data. 
+         * 
+         * @param state the new pause state.
+         * 
+         * @param sync  If set to true the task function will schedule data 
+         *              transmission when called next time and will not wait 
+         *              until it's next tick. From this time on it will 
+         *              transmitt data in the given interval.
+         */
+        void pause(bool state, bool sync=false);
+
+        /**
+         * @brief Tells the current pause state.
+         * 
+         * @return true data transmission is paused 
+         * @return false data transmission is enabled.
+         */
+        bool isPaused(void);
 
         /**
          * @brief Used to add a variable to the data stream.
@@ -267,17 +304,6 @@ class Insight
          */
         void task(uint32_t millis);
 
-        /**
-         * @brief Some statistic data for general use.
-         * 
-         */
-        struct {
-        
-            uint32_t tx;    /** The over all number of bytes transmitted */ 
-            uint32_t esc;   /** The number of inserted escape characters */
-        
-        } Statistic;
-
     private:
 
         /**
@@ -301,16 +327,6 @@ class Insight
         }dataTypes_t; 
 
         /**
-         * @brief Defines the data to know per supported data type.
-         */
-        typedef struct {
-    
-            size_t siz;         /** what sizeof(...) tells us */
-            const char *hdr;    /** the string to use in the header */
-
-        } PayloadSpec_t;
-
-        /**
          * @brief The function implementing the add command.
          * 
          * The public add variants just hand over the correct data for their
@@ -328,6 +344,11 @@ class Insight
          * @brief The internal enabled state.
          */
         bool Enabled;
+
+        /**
+         * @brief The internal pause state.
+         */
+        bool Pause;
 
         /**
          * @brief The last tick of the task function.
@@ -371,6 +392,11 @@ class Insight
          * 
          */
         uint8_t PayloadIdx;
+
+        /**
+         * @brief The number of payload bytes to transmit.
+         */
+        uint8_t PayloadSize;
 };
 
 #endif /* INSIGHT_HPP_ */
