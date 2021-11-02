@@ -1,6 +1,6 @@
 {
     "name": "libinsight",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "keywords": "debugging, data streaming",
     "description": "A libary to stream data in binary form to a host computer.",
     "license": "GPL-3.0",

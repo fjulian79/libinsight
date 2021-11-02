@@ -238,6 +238,51 @@ bool Insight::add(double *ptr, const char *str)
     return add(ptr, dataType_double, str);
 }
 
+bool Insight::add(void *ptr, dataTypes_t type, const char *name)
+{
+    /* While enabled, internal data has to be locked as it is used while 
+     * transmitting data. */
+    if (Enabled || (PayloadIdx == INSIGHT_NUMVALUES))
+    {
+        return false;
+    }
+
+    size_t size = INSIGHT_NAMEBUFFERSIZ - NameBufferPos;
+    if (size == 0)
+    {
+        /* No place left in the buffer; */
+        return false;
+    }
+
+    if (PayloadSize + PayloadSpec[type].siz > INSIGHT_DATABUFFERSIZ)
+    {
+        return false;
+    }
+
+    int written = snprintf((char*) &NameBuffer[NameBufferPos], 
+            size, "%s;", name);
+
+    /* Negative return values are severe errors, it written is larger then size 
+     * then the name does not fit into the buffer. */
+    if ((written > 0) && (written < size))
+    {
+        NameBufferPos+=written;
+        Payload[PayloadIdx].ptr = ptr;
+        Payload[PayloadIdx].type = type;
+        PayloadSize += PayloadSpec[type].siz;
+        PayloadIdx++;
+    }
+    else
+    {
+        /* No success while writing to the name buffer, make sure it is properly
+         * terminated. */
+        NameBuffer[NameBufferPos] = 0;
+        return false;
+    }
+
+    return true;
+}
+
 bool Insight::transmit(void)
 {
     uint8_t buffer[32];
@@ -284,49 +329,4 @@ void Insight::task(uint32_t millis)
         transmit();
         LastTick = millis;
     }
-}
-
-bool Insight::add(void *ptr, dataTypes_t type, const char *name)
-{
-    /* While enabled, internal data has to be locked as it is used while 
-     * transmitting data. */
-    if (Enabled || (PayloadIdx == INSIGHT_NUMVALUES))
-    {
-        return false;
-    }
-
-    size_t size = INSIGHT_NAMEBUFFERSIZ - NameBufferPos;
-    if (size == 0)
-    {
-        /* No place left in the buffer; */
-        return false;
-    }
-
-    if (PayloadSize + PayloadSpec[type].siz > INSIGHT_DATABUFFERSIZ)
-    {
-        return false;
-    }
-
-    int written = snprintf((char*) &NameBuffer[NameBufferPos], 
-            size, "%s;", name);
-
-    /* Negative return values are severe errors, it written is larger then size 
-     * then the name does not fit into the buffer. */
-    if ((written > 0) && (written < size))
-    {
-        NameBufferPos+=written;
-        Payload[PayloadIdx].ptr = ptr;
-        Payload[PayloadIdx].type = type;
-        PayloadSize += PayloadSpec[type].siz;
-        PayloadIdx++;
-    }
-    else
-    {
-        /* No success while writing to the name buffer, make sure it is properly
-         * terminated. */
-        NameBuffer[NameBufferPos] = 0;
-        return false;
-    }
-
-    return true;
 }

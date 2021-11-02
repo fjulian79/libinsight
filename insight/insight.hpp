@@ -32,10 +32,30 @@
 
 #include "insight/config.hpp"
 
+/**
+ * @brief This enum is used to define data types. The interger values 
+ * are used to access const data arrays defined by the implementation.
+ */
+typedef enum {
+
+    dataType_bool    = 0,
+    dataType_uint_8  = 1,
+    dataType_uint_16 = 2,
+    dataType_uint_32 = 3,
+    dataType_uint_64 = 4,
+    dataType_int_8   = 5,
+    dataType_int_16  = 6,
+    dataType_int_32  = 7,
+    dataType_int_64  = 8,
+    dataType_float   = 9,
+    dataType_double  = 10
+
+}dataTypes_t; 
+
 class Insight
 {
     public:
-
+    
         /**
          * @brief Construct a new Insight object
          */
@@ -283,6 +303,20 @@ class Insight
         bool add(double *ptr, const char *str);
 
         /**
+         * @brief The function implementing the add command.
+         * 
+         * The public add variants just hand over the correct data for their
+         * particular data type.
+         * 
+         * @param ptr The pointer to the users variable.
+         * @param type The type specification. 
+         * @param name The name of the variable.
+         * @return true in case of success.
+         * @return false in case of a error.
+         */
+        bool add(void *ptr, dataTypes_t type, const char *name);
+
+        /**
          * @brief Used to collect the data added to the data transmission and 
          * transmitt a single frame to the host. 
          * 
@@ -305,40 +339,6 @@ class Insight
         void task(uint32_t millis);
 
     private:
-
-        /**
-         * @brief This enum is used to define data types. The interger values 
-         * are used to access const data arrays defined by the implementation.
-         */
-        typedef enum {
-    
-            dataType_bool    = 0,
-            dataType_uint_8  = 1,
-            dataType_uint_16 = 2,
-            dataType_uint_32 = 3,
-            dataType_uint_64 = 4,
-            dataType_int_8   = 5,
-            dataType_int_16  = 6,
-            dataType_int_32  = 7,
-            dataType_int_64  = 8,
-            dataType_float   = 9,
-            dataType_double  = 10
-
-        }dataTypes_t; 
-
-        /**
-         * @brief The function implementing the add command.
-         * 
-         * The public add variants just hand over the correct data for their
-         * particular data type.
-         * 
-         * @param ptr The pointer to the users variable.
-         * @param type The type specification. 
-         * @param name The name of the variable.
-         * @return true in case of success.
-         * @return false in case of a error.
-         */
-        bool add(void *ptr, dataTypes_t type, const char *name);
 
         /**
          * @brief The internal enabled state.
